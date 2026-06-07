@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,17 +9,26 @@ import { IndianRupee, TrendingUp, Zap, Info, Loader2 } from "lucide-react";
 import { formatINR } from "@/lib/formatters";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { generateStrategicGrowthNarrative } from "@/ai/flows/strategic-growth-narrative-flow";
+import { useToast } from "@/hooks/use-toast";
 
 export function CalculatorLayout() {
+  const { toast } = useToast();
   const [amount, setAmount] = useState<number>(1000);
   const [multiplier, setMultiplier] = useState<number>(1.75);
   const [narrative, setNarrative] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const finalAmount = useMemo(() => amount * multiplier, [amount, multiplier]);
-  const profit = useMemo(() => finalAmount - amount, [amount, multiplier]);
+  const finalAmount = useMemo(() => {
+    const val = amount * multiplier;
+    return isNaN(val) ? 0 : val;
+  }, [amount, multiplier]);
 
-  const isValid = amount > 0 && multiplier > 0;
+  const profit = useMemo(() => {
+    const val = finalAmount - amount;
+    return isNaN(val) ? 0 : val;
+  }, [amount, finalAmount]);
+
+  const isValid = amount >= 0 && multiplier >= 0;
 
   const handleGenerateNarrative = async () => {
     if (!isValid) return;
@@ -33,7 +42,11 @@ export function CalculatorLayout() {
       });
       setNarrative(result.narrative);
     } catch (error) {
-      console.error("Failed to generate narrative", error);
+      toast({
+        variant: "destructive",
+        title: "Analysis Failed",
+        description: "We couldn't generate a strategic narrative at this moment. Please try again.",
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -131,7 +144,7 @@ export function CalculatorLayout() {
                 <div className="p-4 bg-muted/40 rounded-2xl border border-white/5">
                   <p className="text-xs text-muted-foreground mb-1 uppercase font-medium">Return Rate</p>
                   <p className="text-xl font-bold text-foreground">
-                     {multiplier.toFixed(2)}x
+                     {(multiplier || 0).toFixed(2)}x
                   </p>
                 </div>
               </div>

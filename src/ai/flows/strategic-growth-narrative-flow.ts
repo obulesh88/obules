@@ -12,10 +12,10 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const StrategicGrowthNarrativeInputSchema = z.object({
-  amount: z.number().positive().describe('The initial investment amount in Indian Rupees (₹).'),
-  multiplier: z.number().positive().describe('The multiplier applied to the amount (e.g., 1.75 for 1.75x).'),
-  finalAmount: z.number().positive().describe('The final calculated amount after applying the multiplier.'),
-  profit: z.number().positive().describe('The total profit generated.'),
+  amount: z.number().nonnegative().describe('The initial investment amount in Indian Rupees (₹).'),
+  multiplier: z.number().nonnegative().describe('The multiplier applied to the amount (e.g., 1.75 for 1.75x).'),
+  finalAmount: z.number().nonnegative().describe('The final calculated amount after applying the multiplier.'),
+  profit: z.number().describe('The total profit generated (can be negative in case of loss).'),
 });
 export type StrategicGrowthNarrativeInput = z.infer<typeof StrategicGrowthNarrativeInputSchema>;
 
@@ -42,7 +42,7 @@ Multiplier Applied: {{{multiplier}}}x
 Final Amount: ₹{{{finalAmount}}}
 Total Profit: ₹{{{profit}}}
 
-Based on these figures, provide a meaningful interpretation of the profit's scale and its potential impact. The narrative should be encouraging and focus on the growth achieved.`,
+Based on these figures, provide a meaningful interpretation of the profit's scale and its potential impact. The narrative should be encouraging and focus on the growth achieved. If there is a loss (negative profit), provide a constructive insight on resilience or strategic adjustment.`,
 });
 
 const strategicGrowthNarrativeFlow = ai.defineFlow(
