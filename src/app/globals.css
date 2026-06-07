@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 255 22% 9%;
-    --foreground: 0 0% 98%;
-    --card: 255 22% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover: 255 22% 9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 254 54% 66%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 255 20% 18%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 255 20% 15%;
-    --muted-foreground: 255 10% 70%;
-    --accent: 225 100% 69%;
-    --accent-foreground: 255 22% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 255 20% 20%;
-    --input: 255 20% 20%;
-    --ring: 254 54% 66%;
-    --radius: 0.75rem;
+    --background: 222 47% 4%;
+    --foreground: 213 31% 91%;
+    --card: 222 47% 6%;
+    --card-foreground: 213 31% 91%;
+    --popover: 222 47% 4%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 191 91% 50%;
+    --primary-foreground: 222 47% 4%;
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 213 31% 91%;
+    --muted: 222 47% 15%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 263 90% 65%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 222 47% 15%;
+    --input: 222 47% 15%;
+    --ring: 191 91% 50%;
+    --radius: 1rem;
   }
 }
 
@@ -33,16 +33,27 @@
   }
   body {
     @apply bg-background text-foreground font-body;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(191, 91%, 50%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(263, 90%, 65%, 0.05) 0px, transparent 50%);
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-bold;
+    @apply font-headline font-bold tracking-tight;
   }
 }
 
 .glass-morphism {
-  background: rgba(21, 18, 28, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(142, 120, 217, 0.2);
+  background: rgba(8, 10, 15, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px -5px hsla(191, 91%, 50%, 0.3);
+}
+
+.glow-accent {
+  box-shadow: 0 0 20px -5px hsla(263, 90%, 65%, 0.3);
 }
 
 .number-scroll {

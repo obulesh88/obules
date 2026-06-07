@@ -5,16 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { IndianRupee, TrendingUp, Zap, Info, Loader2 } from "lucide-react";
+import { IndianRupee, TrendingUp, Zap, Info, Loader2, BarChart3, ArrowRight } from "lucide-react";
 import { formatINR } from "@/lib/formatters";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { generateStrategicGrowthNarrative } from "@/ai/flows/strategic-growth-narrative-flow";
 import { useToast } from "@/hooks/use-toast";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export function CalculatorLayout() {
   const { toast } = useToast();
-  const [amount, setAmount] = useState<number>(1000);
-  const [multiplier, setMultiplier] = useState<number>(1.75);
+  const [amount, setAmount] = useState<number>(50000);
+  const [multiplier, setMultiplier] = useState<number>(2.5);
   const [narrative, setNarrative] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -27,6 +28,11 @@ export function CalculatorLayout() {
     const val = finalAmount - amount;
     return isNaN(val) ? 0 : val;
   }, [amount, finalAmount]);
+
+  const chartData = useMemo(() => [
+    { name: 'Initial', value: amount, color: 'hsl(var(--muted-foreground))' },
+    { name: 'Profit', value: profit, color: profit >= 0 ? 'hsl(var(--primary))' : 'hsl(var(--destructive))' },
+  ], [amount, profit]);
 
   const isValid = amount >= 0 && multiplier >= 0;
 
@@ -45,7 +51,7 @@ export function CalculatorLayout() {
       toast({
         variant: "destructive",
         title: "Analysis Failed",
-        description: "We couldn't generate a strategic narrative at this moment. Please try again.",
+        description: "We couldn't generate a strategic narrative. Please try again.",
       });
     } finally {
       setIsGenerating(false);
@@ -53,80 +59,108 @@ export function CalculatorLayout() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Input Section */}
-        <Card className="glass-morphism border-none shadow-2xl overflow-hidden group">
-          <div className="h-1.5 w-full bg-gradient-to-r from-primary to-accent" />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Controls - 4 cols */}
+      <div className="lg:col-span-4 space-y-6">
+        <Card className="glass-morphism border-none shadow-2xl overflow-hidden glow-primary">
           <CardHeader className="pb-4">
-            <CardTitle className="text-3xl flex items-center gap-2">
-              <Zap className="text-primary w-6 h-6" />
-              GainGraph
+            <CardTitle className="text-xl flex items-center gap-2 text-white">
+              <Zap className="text-primary w-5 h-5 fill-current" />
+              Growth Parameters
             </CardTitle>
-            <CardDescription className="text-muted-foreground/80">
-              Precision multiplier analysis for digital assets and investments.
+            <CardDescription className="text-muted-foreground/70">
+              Configure your investment variables.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
-              <Label htmlFor="amount" className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-                <IndianRupee className="w-4 h-4" />
-                Investment Amount (₹)
+              <Label htmlFor="amount" className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                <IndianRupee className="w-3 h-3" />
+                Capital Outlay
               </Label>
-              <div className="relative">
+              <div className="relative group">
                 <Input
                   id="amount"
                   type="number"
-                  placeholder="e.g. 1000"
                   value={amount || ''}
                   onChange={(e) => setAmount(Number(e.target.value))}
-                  className="bg-background/50 border-border/50 h-14 text-xl focus:ring-primary focus:border-primary transition-all rounded-xl pl-4"
+                  className="bg-muted/20 border-white/10 h-14 text-xl font-bold focus:ring-primary focus:border-primary transition-all rounded-xl pl-4 text-white"
                 />
+                <div className="absolute inset-0 rounded-xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </div>
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="multiplier" className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-                <TrendingUp className="w-4 h-4" />
-                Growth Multiplier (x)
+              <Label htmlFor="multiplier" className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                <TrendingUp className="w-3 h-3" />
+                Multiplier Target
               </Label>
-              <div className="relative">
+              <div className="relative group">
                 <Input
                   id="multiplier"
                   type="number"
-                  step="0.01"
-                  placeholder="e.g. 1.75"
+                  step="0.1"
                   value={multiplier || ''}
                   onChange={(e) => setMultiplier(Number(e.target.value))}
-                  className="bg-background/50 border-border/50 h-14 text-xl focus:ring-primary focus:border-primary transition-all rounded-xl pl-4"
+                  className="bg-muted/20 border-white/10 h-14 text-xl font-bold focus:ring-primary focus:border-primary transition-all rounded-xl pl-4 text-white"
                 />
+                <div className="absolute inset-0 rounded-xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </div>
             </div>
 
             <Button 
               onClick={handleGenerateNarrative}
               disabled={!isValid || isGenerating}
-              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all active:scale-[0.98]"
+              className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-sm uppercase tracking-widest rounded-xl transition-all active:scale-[0.97] group"
             >
               {isGenerating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing Growth...
+                  Processing...
                 </>
               ) : (
-                "Generate Strategic Insight"
+                <>
+                  Generate Narrative
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
               )}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Output Section */}
-        <div className="space-y-6">
-          <Card className="glass-morphism border-none shadow-2xl relative overflow-hidden">
-            <CardContent className="pt-8 space-y-8">
-              <div className="space-y-1">
-                <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">Total Profit</p>
-                <h2 className="text-6xl font-black text-accent drop-shadow-[0_0_15px_rgba(96,136,255,0.4)]">
+        {/* AI Insight Card */}
+        <Card className={`glass-morphism border-none shadow-xl transition-all duration-500 overflow-hidden ${narrative ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+          <div className="h-1 w-full bg-gradient-to-r from-primary via-accent to-primary" />
+          <CardContent className="pt-6">
+            <div className="flex gap-4">
+              <div className="mt-1 flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                  <Info className="w-5 h-5 text-primary" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-xs font-black text-primary uppercase tracking-widest">AI Strategic Insight</h4>
+                <p className="text-muted-foreground text-sm leading-relaxed font-medium">
+                  {narrative}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Dashboard - 8 cols */}
+      <div className="lg:col-span-8 space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Main Profit Display */}
+          <Card className="glass-morphism border-none shadow-2xl md:col-span-2 relative overflow-hidden glow-accent">
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+              <BarChart3 className="w-32 h-32 text-accent" />
+            </div>
+            <CardContent className="pt-10 pb-12 px-10 space-y-10 relative z-10">
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-black">Net Projected Profit</p>
+                <h2 className="text-7xl md:text-8xl font-black text-white tracking-tighter">
                   <AnimatedNumber 
                     value={profit} 
                     formatter={formatINR} 
@@ -134,46 +168,67 @@ export function CalculatorLayout() {
                 </h2>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-muted/40 rounded-2xl border border-white/5">
-                  <p className="text-xs text-muted-foreground mb-1 uppercase font-medium">Final Value</p>
-                  <p className="text-xl font-bold text-foreground">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                <div className="p-6 bg-white/[0.03] rounded-2xl border border-white/5 backdrop-blur-sm">
+                  <p className="text-[10px] text-muted-foreground mb-2 uppercase font-black tracking-widest">Gross Value</p>
+                  <p className="text-2xl font-bold text-white">
                      <AnimatedNumber value={finalAmount} formatter={formatINR} />
                   </p>
                 </div>
-                <div className="p-4 bg-muted/40 rounded-2xl border border-white/5">
-                  <p className="text-xs text-muted-foreground mb-1 uppercase font-medium">Return Rate</p>
-                  <p className="text-xl font-bold text-foreground">
+                <div className="p-6 bg-white/[0.03] rounded-2xl border border-white/5 backdrop-blur-sm">
+                  <p className="text-[10px] text-muted-foreground mb-2 uppercase font-black tracking-widest">Growth Rate</p>
+                  <p className="text-2xl font-bold text-primary">
                      {(multiplier || 0).toFixed(2)}x
+                  </p>
+                </div>
+                <div className="hidden md:block p-6 bg-white/[0.03] rounded-2xl border border-white/5 backdrop-blur-sm">
+                  <p className="text-[10px] text-muted-foreground mb-2 uppercase font-black tracking-widest">Efficiency</p>
+                  <p className="text-2xl font-bold text-accent">
+                     {multiplier > 1 ? '+' : ''}{((multiplier - 1) * 100).toFixed(0)}%
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* AI Narrative Section */}
-          <Card className={`glass-morphism border-none shadow-xl transition-all duration-700 ${narrative ? 'opacity-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
-             <CardContent className="pt-6">
-                <div className="flex gap-4">
-                  <div className="mt-1 flex-shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                       <Info className="w-4 h-4 text-primary" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-bold text-primary uppercase tracking-wider">Strategic Insight</h4>
-                    <p className="text-muted-foreground text-sm leading-relaxed italic">
-                      "{narrative}"
-                    </p>
-                  </div>
-                </div>
-             </CardContent>
+          {/* Visual Representation */}
+          <Card className="glass-morphism border-none shadow-2xl md:col-span-2 overflow-hidden">
+            <CardHeader className="pb-0">
+              <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Allocation Visualizer</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="rgba(255,255,255,0.3)" 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    stroke="rgba(255,255,255,0.3)" 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false}
+                    tickFormatter={(value) => `₹${value / 1000}k`}
+                  />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                    itemStyle={{ color: '#fff' }}
+                    formatter={(value: number) => [formatINR(value), 'Value']}
+                  />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={60}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
           </Card>
         </div>
-      </div>
-
-      <div className="pt-12 text-center text-xs text-muted-foreground/40 font-medium tracking-tighter uppercase">
-        GainGraph v1.0 • Precision Growth Logic Enabled
       </div>
     </div>
   );
